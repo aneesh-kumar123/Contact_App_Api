@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     userId: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'contacts',
+    modelName: 'contact',
     underscored: true,
     paranoid:true
   });

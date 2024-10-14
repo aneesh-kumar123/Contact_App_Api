@@ -1,4 +1,5 @@
 const ContactDetail = require('../../contact_detail/service/user.js');
+const db = require('../../../models')
 class Contact {
   static contactId = 0
   constructor(firstName, lastName) {
@@ -9,7 +10,7 @@ class Contact {
     this.contactId = Contact.contactId++;
   }
   
-  static createContact(firstName, lastName) {
+  static async createContact(firstName, lastName,userId) {
     try {
       if (firstName == "" || lastName == "") {
         throw new Error("firstName and lastName should not be empty");
@@ -17,16 +18,101 @@ class Contact {
       if (firstName == lastName) {
         throw new Error("firstName and lastName should not be same");
       }
-      let contact = new Contact(firstName, lastName);
+      if(userId < 0)
+      {
+        throw new Error("userId should not be negative");
+      }
+      // let contact = new Contact(firstName, lastName);
+      const contact = await db.contact.create({firstName,lastName,userId})
       // Contact.#allcontact.push(contact);
       return contact
 
     }
     catch (error) {
       console.log(error)
+      throw error
     }
 
   }
+
+
+  static async getAllContact(staff)
+  {
+    try {
+     if(!staff)
+     {
+      throw new Error("staff should not be empty");
+     }
+      const contact = await db.contact.findAll({where:{userId:staff.id}})
+      return contact
+    }
+    catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  static async getContactById(staff,id)
+  {
+    try {
+      if(!staff)
+      {
+        throw new Error("staff should not be empty");
+      }
+      if(id<0)
+      {
+        throw new Error("id should not be negative");
+      }
+      const contact = await db.contact.findOne({where:{id,userId:staff.id}})
+      return contact
+    }
+    catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  static async updateContactById(userId,contactId,parameter,value)
+  {
+    try {
+      if(userId<0 || contactId<0)
+      {
+        throw new Error("id should not be negative");
+      }
+      const contact = await db.contact.update({[parameter]:value},{where:{id:contactId,userId:userId}})
+      if(contact<=0)
+      {
+        throw new Error("check parameter");
+      }
+      return contact
+    }
+    catch (error) {
+      console.log(error)
+      throw error
+    }
+
+  }
+
+  static async deleteContactById(userId,contactId)
+  {
+    try {
+      if(userId<0 || contactId<0)
+      {
+        throw new Error("id should not be negative");
+      }
+      const contact = await db.contact.destroy({where:{id:contactId,userId:userId}})
+      if(contact<=0)
+      {
+        throw new Error("check parameter");
+      }
+      return contact
+    }
+    catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+  
 
 
 

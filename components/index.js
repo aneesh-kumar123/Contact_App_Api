@@ -76,7 +76,7 @@ try{
 
   //compare password
   if(await bcrypt.compare(password , user.password)){
-    let payload = newPayload(user.userId,user.isAdmin)
+    let payload = newPayload(user.id,user.isAdmin)
     console.log(payload)
     let token = payload.signPayload()  
     console.log(token)

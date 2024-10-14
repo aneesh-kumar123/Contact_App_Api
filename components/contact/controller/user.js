@@ -1,8 +1,11 @@
 const User = require('../../user/service/user');
+const Contact = require('../../contact/service/user');
+
 const badRequest = require('../../../errors/badRequest')
 const NotFoundError = require('../../../errors/notFoundError')
 // const {Payload} = require('../../../middlewares/authorization')
 const Logger = require('../../../util/logger');
+const db = require('../../../models')
 const UnAuthorizedError = require('../../../errors/unAuthorizedError');
 
 
@@ -20,44 +23,31 @@ const createNewContact = async (req,res,next) =>{
       // console.log(id)
       throw new badRequest("id is not valid")
     }
-    // console.log("id is ok")
-    
-    const token = req.cookies.auth.split(' ')[2];
-    if(!token)
-    {
-      // throw new Error("token not found")
-      throw new UnAuthorizedError("Token Not Found")
-
-    }
-    // console.log("token is ok")
-
-    // let payload = Payload.verifyToken(token);
-    // if(!payload)
-    // {
-    //   throw new UnAuthorizedError("Token is not valid")
-    // }
-    //  console.log(payload)
-
-    // let payloadId = payload.id
-    // if(payloadId != id)
-    // {
-    //   throw new UnAuthorizedError("id is not matching with staff")
-    // }
-    // console.log("payload is ok")
 
     const {firstName,lastName} = req.body;
     if(!firstName || !lastName)
     {
       throw new badRequest("firstName or lastName is not valid")
     }
-    const admin = User.allAdmins[0];
-    const user = admin.getStaffById(id);
-    if(!user)
+
+    const staff= await db.user.findOne({
+      where:{id:id,isActive:true}
+    })
+
+    if(!staff)
     {
       throw new NotFoundError("user not found")
     }
-    console.log(user)
-    const newContact = user.createContact(firstName,lastName)
+
+    const newContact = await Contact.createContact(firstName,lastName,staff.id)
+    // const admin = User.allAdmins[0];
+    // const user = admin.getStaffById(id);
+    // if(!user)
+    // {
+    //   throw new NotFoundError("user not found")
+    // }
+    // console.log(user)
+    // const newContact = user.createContact(firstName,lastName)
     if(!newContact)
     {
       throw new NotFoundError("contact not found")
@@ -83,13 +73,12 @@ const getAllContact = async (req,res,next) =>{
       // console.log(id)
       throw new badRequest("id is not valid")
     }
-    const admin = User.allAdmins[0];
-    const staffUser = admin.getStaffById(id);
-    if(!staffUser)
-    {
-      throw new NotFoundError("user not found")
-    }
-    const allContact = staffUser.getAllContact();
+    const staff = await db.user.findOne({
+      where:{id:id}
+    })
+    
+    const allContact = await Contact.getAllContact(staff)
+  
     if(!allContact)
     {
       throw new NotFoundError("contact not found")
@@ -100,8 +89,6 @@ const getAllContact = async (req,res,next) =>{
     }
     catch(error)
     {
-      // res.status(500).json({error : "something went wrong"})
-      // console.log(error)
       next(error)
     }
     
@@ -118,20 +105,18 @@ const getContactByID = async (req,res,next) =>{
       // console.log(id)
       throw new badRequest("id is not valid")
     }
-    const admin = User.allAdmins[0];
-    const staffUser = admin.getStaffById(id);
-    if(!staffUser)
-    {
-      throw new NotFoundError("user not found")
-    }
-
     const userId = parseInt(req.params.id);
     if(isNaN(userId))
     {
       // console.log(id)
       throw new badRequest("id is not valid")
     }
-    const contact = staffUser.getContactById(userId);
+    const staff = await db.user.findOne({
+      where:{id:id}
+    })
+
+    const contact = await Contact.getContactById(staff,userId)
+    
     if(!contact)
     {
       throw new NotFoundError("contact not found")
@@ -152,11 +137,11 @@ const getContactByID = async (req,res,next) =>{
 }
 
 //update contact by id
-const updateContact = async (req,res) =>{
+const updateContact = async (req,res,next) =>{
   try{
     Logger.info("updating contact by id started")
-    const id = parseInt(req.params.userID);
-    if(isNaN(id))
+    const userId = parseInt(req.params.userID);
+    if(isNaN(userId))
     {
       // console.log(id)
       throw new badRequest("id is not valid")
@@ -172,28 +157,20 @@ const updateContact = async (req,res) =>{
       throw new badRequest("value is required")
     }
 
-    const userId = parseInt(req.params.id);
-    if(isNaN(userId))
+    const contactId = parseInt(req.params.id);
+    if(isNaN(contactId))
     {
       // console.log(id)
       throw new badRequest("id is not valid")
     }
-    const admin = User.allAdmins[0];
-    const staffUser = admin.getStaffById(id);
-    if(!staffUser)
-    {
-      throw new NotFoundError("user not found")
-    }
 
-
-
-    const contact = staffUser.updateContactById(userId,parameter,value);
-    if(!contact)
+    const updatedContact = await Contact.updateContactById(userId,contactId,parameter,value)
+    if(!updatedContact)
     {
       throw new NotFoundError("contact not updated")
     }
     Logger.info("updating contact by id ended")
-    res.status(200).json(contact)
+    res.status(200).json(updatedContact)
   }
   catch(error)
   {
@@ -207,27 +184,20 @@ const updateContact = async (req,res) =>{
 const deleteContact = async (req,res,next) =>{
   try{
     Logger.info("delete contacted by id started")
-    const id = parseInt(req.params.userID);
-    if(isNaN(id))
-    {
-      // console.log(id)
-      throw new badRequest("id is not valid")
-    }
-    const admin = User.allAdmins[0];
-    const staffUser = admin.getStaffById(id);
-    if(!staffUser)
-    {
-      throw new NotFoundError("user not found")
-    }
-
-    const userId = parseInt(req.params.id);
+    const userId = parseInt(req.params.userID);
     if(isNaN(userId))
     {
       // console.log(id)
       throw new badRequest("id is not valid")
     }
+    const id = parseInt(req.params.id);
+    if(isNaN(id))
+    {
+      // console.log(id)
+      throw new badRequest("id is not valid")
+    }
 
-    const contact = staffUser.deleteContactById(userId);
+    const contact = await Contact.deleteContactById(userId,id)
     if(!contact)
     {
       throw new NotFoundError("contact not deleted")

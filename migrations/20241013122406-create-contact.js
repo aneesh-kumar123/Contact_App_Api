@@ -22,7 +22,7 @@ module.exports = {
           model: 'users', 
           key: 'id' 
         },
-        onUpdate: 'CASCADE',  // If a user id changes, update this automatically
+        onUpdate: 'CASCADE',  
         onDelete: 'SET NULL'
       },
         created_at: {

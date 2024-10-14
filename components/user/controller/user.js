@@ -105,13 +105,22 @@ const updateUser = async (req, res, next) => {
       throw new badRequest("user id not provided");
     }
 
-    const updateData = req.body;
-    const isUpdated = await User.updateUserById(id,updateData);
+    // const updateData = req.body;
+    const { parameter,value } = req.body;
+    if(!parameter)
+    {
+      throw new badRequest("parameter is required")
+    }
+    if(!value)
+    {
+      throw new badRequest("value is required")
+    }
+    const isUpdated = await User.updateUserById(id,parameter,value);
     if (!isUpdated) {
       throw new NotFoundError("could not update");
     }
 
-    res.status(200).json({ message: "user with id ${id} has been updated" })
+    res.status(200).json({ message: "user  has been updated" })
 
   }
   catch (error) {

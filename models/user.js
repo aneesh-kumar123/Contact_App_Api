@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      user.hasMany(models.contact, { foreignKey: 'user_id' });
+      user.hasMany(models.contact, { foreignKey: 'user_id',as: 'user' });
 
     }
   }
@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     isActive: DataTypes.BOOLEAN
   }, {
     sequelize,
-    modelName: 'users',
+    modelName: 'user',
     underscored: true,
     paranoid:true
   });

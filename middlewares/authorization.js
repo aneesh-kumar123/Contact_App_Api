@@ -66,6 +66,7 @@ const verifyStaff = (req,res,next) =>{
 
     let payload = Payload.verifyToken(token);
     req.user=payload.id;
+    console.log("request user",req.user)
 
     console.log(payload);
 
@@ -89,15 +90,17 @@ const verifyStaff = (req,res,next) =>{
 const verifyUserId =(req,res,next) => {
   try{
     Logger.info("verifyUserId started")
-    const {userId} = req.params;
+    const {userID} = req.params;
+    console.log(userID)
     const user = req.user;
-    if(!userId)
+    console.log(user)
+    if(!userID)
     {
       // throw new Error("userId not found")
       throw new UnAuthorizedError("userId not found")
     }
 
-    if(user != userId)
+    if(user != userID)
     {
       // throw new Error("userId not matched")
       throw new UnAuthorizedError("userId not matched")

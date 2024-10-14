@@ -42,7 +42,7 @@ class User {
       // now create new user
       const hashedPassword = await bcrypt.hash(password , 10);
 
-      const existingUser = await db.users.findOne({
+      const existingUser = await db.user.findOne({
         where: { userName }
       });
   
@@ -77,7 +77,7 @@ class User {
         throw new Error("firstName and lastName should not be same")
       }
       const hashedPassword = await bcrypt.hash(password , 10);
-      const existingUser = await db.users.findOne({
+      const existingUser = await db.user.findOne({
         where: { userName }
       });
   
@@ -87,7 +87,7 @@ class User {
       }
      
       // let newStaff = new User(firstName, lastName, false,userName,hashedPassword)
-      let newStaff = await db.users.create({firstName, lastName,userName,password: hashedPassword, isAdmin: false, isActive: true})
+      let newStaff = await db.user.create({firstName, lastName,userName,password: hashedPassword, isAdmin: false, isActive: true})
       // User.#allStaffs.push(newStaff);
   
       // User.#allusers.push(newStaff)
@@ -107,7 +107,7 @@ class User {
         throw new Error("userName should be string")
       }
       // let user = User.#allusers.find((user) => user.userName == userName  && user.isActive)
-      let user = await db.users.findOne({where:{
+      let user = await db.user.findOne({where:{
         userName,isActive:true
       }});
       // findOne({ where: { userName, isActive: true } });
@@ -153,7 +153,7 @@ class User {
     // return User.#allusers.filter(user => user.isActive)
     try {
       console.log("Fetching all users now...");
-      let users = await db.users.findAll();
+      let users = await db.user.findAll();
       console.log("Fetched users:");
       // console.log(JSON.stringify(users, null, 2));
       return users;
@@ -174,7 +174,7 @@ class User {
         throw new Error("userid should be positive")
       }
       // let user = User.#allusers.find(user => user.userId == userId)
-      let user = await db.users.findByPk(userId);
+      let user = await db.user.findByPk(userId);
       if (!user) {
         throw new Error("user not found")
       }
@@ -251,7 +251,7 @@ class User {
   }
 
   //now updateuser
-  static async updateUserById(userId, updateData) {
+  static async updateUserById(userId, parameter,value) {
     try {
       //validate userid and parameter
       if (isNaN(Number(userId))) {
@@ -260,14 +260,17 @@ class User {
       if (userId < 0) {
         throw new Error("userid should be positive")
       }
-
-      if (typeof updateData != "object") {
-        throw new Error("updateData is not object")
+      if (typeof parameter != "string") {
+        throw new Error("parameter is not string")
       }
-
-      let user = await db.users.update(updateData, {
-        where: { id: userId }
-    });
+    let user = await db.user.update({[parameter]:value}, {
+        where: { id: userId }  
+    })
+    console.log(user)
+    if(user<=0)
+    {
+      throw new Error("check parameter")
+    }
     console.log("Updated user:");
     console.log(JSON.stringify(user, null, 2));
     return user;
@@ -291,7 +294,7 @@ class User {
       }
       // let foundOfUser = User.getUserById(userId)
       //just inactive the user
-      const deleted = await db.users.destroy({
+      const deleted = await db.user.destroy({
         where: { id: userId}
       })
      
