@@ -1,19 +1,19 @@
-
+const db = require('../../../models')
 class ContactDetail {
   // static #allcontactDetail = []
-  static contactDetailId = 0
+  // static contactDetailId = 0
 
-  constructor(contactId, type, value) {
-    this.contactId = contactId
-    this.type = type
-    this.value = value
-    this.isActive = true
-    this.contactDetailId = ContactDetail.contactDetailId++
+  // constructor(contactId, type, value) {
+  //   this.contactId = contactId
+  //   this.type = type
+  //   this.value = value
+  //   this.isActive = true
+  //   this.contactDetailId = ContactDetail.contactDetailId++
 
-  }
+  // }
 
 
-  static createContactDetail(contactId, type, value) {
+  static async createNewContactDetail(contact, type, value) {
     try {
       
       // if (typeof contactId != "number") {
@@ -25,18 +25,17 @@ class ContactDetail {
       if (type != "phone" && type != "email") {
         throw new Error("Invalid type")
       }
-      // if (type === "phone") {
-      //   ContactDetail.validatePhone(value)
-      // }
-      // if (type === "email") {
-      //   ContactDetail.validateEmail(value)
-      // }
 
-      let newContactDetail = new ContactDetail(contactId, type, value)
-      if (newContactDetail == undefined) {
-        throw new Error("Invalid contact detail")
-      }
-      // ContactDetail.#allcontactDetail.push(newContactDetail)
+
+      const newContactDetail = await db.contactDetail.create({
+        type: type,
+        value: value,
+        contactId:contact.id
+        
+      })
+
+
+
       return newContactDetail
     }
     catch (error) {
@@ -45,30 +44,94 @@ class ContactDetail {
 
   }
 
-
-
-  updateContactDetail(propertyName, newValue) {
+  static async getAllContactDetail(contact)
+  {
     try {
-      switch (propertyName) {
-        case "type":
-          this.type = newValue;
-          break;
-        case "value":
-          this.value = newValue;
-          break;
-        default:
-          throw new Error("Invalid property name.");
-      }
-    } catch (error) {
-      console.log(error);
+      const contactDetail = await db.contactDetail.findAll({
+        where: {
+          contactId: contact.id
+        }
+      })
+      return contactDetail
+    }
+    catch (error) {
+      console.log(error)
+      throw error
     }
   }
 
-   deleteContactDetail() {
-    this.isActive=false
-
-    
+  static async getContactDetailById(contact,id)
+  {
+    try {
+      const contactDetail = await db.contactDetail.findOne({
+        where: {
+          contactId: contact.id,
+          id:id
+        }
+      })
+      return contactDetail
+    }
+    catch (error) {
+      console.log(error)
+      throw error
+    }
   }
+
+  static async updateContactDetailById(contact,id,type,value)
+  {
+    try {
+
+     
+        if (type != "phone" && type != "email") {
+          throw new Error("Invalid type")
+        }
+      
+      const contactDetail = await db.contactDetail.update({
+        type: type,
+        value: value,
+      },
+        {
+          where: {
+            contactId: contact.id,
+            id:id
+
+
+          }
+        })
+
+        if(contactDetail<=0)
+        {
+          throw new Error("check type or value")
+        }
+      return contactDetail
+    }
+    catch (error) {
+      console.log(error)
+      throw error
+    }
+
+  }
+
+  static async deleteContactDetailById(contact,id)
+  {
+    try {
+      const contactDetail = await db.contactDetail.destroy({
+        where: {
+          contactId: contact.id,
+          id:id
+        }
+      })
+      return contactDetail
+    }
+    catch (error) {
+      console.log(error)
+      throw error
+    }
+
+  }
+
+
+
 }
 
 module.exports = ContactDetail;

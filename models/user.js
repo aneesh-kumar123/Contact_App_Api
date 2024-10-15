@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      user.hasMany(models.contact, { foreignKey: 'user_id',as: 'user' });
+      user.hasMany(models.contact, { foreignKey: 'user_id'});
 
     }
   }
@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     password: DataTypes.STRING,
     isAdmin: DataTypes.BOOLEAN,
-    isActive: DataTypes.BOOLEAN
+    // isActive: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'user',
